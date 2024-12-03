@@ -1,4 +1,5 @@
 <?php
+
 namespace MVC;
 
 class Router
@@ -15,17 +16,16 @@ class Router
 
   public function checkRoutes()
   {
-   
-    $method = $_SERVER["REQUEST_METHOD"];
-    $url = $_SERVER["REQUEST_URI"]; 
 
-     $fn = "";
-     if ($method === "GET") {
+    $method = $_SERVER["REQUEST_METHOD"];
+    $url = strtok($_SERVER["REQUEST_URI"], "?") ?? "/";
+    $fn = "";
+    if ($method === "GET") {
       $fn = $this->routesGet[$url] ?? null;
-     }
+    }
 
     if ($fn) {
-      call_user_func($fn,$this);
+      call_user_func($fn, $this);
     } else {
       echo "NO ROUTE FOUNDED";
     }
@@ -33,14 +33,13 @@ class Router
 
   public function render($view, $args = [])
   {
-    foreach($args as $key => $value){
+    foreach ($args as $key => $value) {
       $$key = $value;
     }
 
     ob_start();
-    include __DIR__ ."/views/pages/$view.php";
+    include __DIR__ . "/views/pages/$view.php";
     $content = ob_get_clean();
-    include __DIR__. "/views/layout.php";
-
+    include __DIR__ . "/views/layout.php";
   }
 }
