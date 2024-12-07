@@ -6,6 +6,7 @@ class Router
 {
 
   private $routesGet = [];
+  private $routesPost = [];
 
 
   public function get($url, $fn)
@@ -13,15 +14,25 @@ class Router
     $this->routesGet[$url] = $fn;
   }
 
+  public function post($url, $fn)
+  {
+    $this->routesPost[$url] = $fn;
+  }
+
 
   public function checkRoutes()
   {
 
     $method = $_SERVER["REQUEST_METHOD"];
-    $url = strtok($_SERVER["REQUEST_URI"], "?") ?? "/";
+    $ulrWithoutParams = strtok($_SERVER["REQUEST_URI"], "?");
+    $url =  $ulrWithoutParams === "/" ? "/home" :  $ulrWithoutParams;
     $fn = "";
+
     if ($method === "GET") {
       $fn = $this->routesGet[$url] ?? null;
+    }
+    if ($method === "POST") {
+      $fn = $this->routesPost[$url] ?? null;
     }
 
     if ($fn) {
