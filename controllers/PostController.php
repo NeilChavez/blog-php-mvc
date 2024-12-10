@@ -2,13 +2,23 @@
 
 namespace Controller;
 
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
 use Model\Post;
 use MVC\Router;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class PostController
 {
+
+  public static function admin(Router $router)
+  {
+    $posts = Post::getAll();
+
+    $router->render("/posts/admin", [
+      "posts" => $posts
+    ]);
+    
+  }
   public static function create(Router $router)
   {
     $post = new Post();
