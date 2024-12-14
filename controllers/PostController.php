@@ -17,7 +17,6 @@ class PostController
     $router->render("/posts/admin", [
       "posts" => $posts
     ]);
-    
   }
   public static function create(Router $router)
   {
@@ -81,6 +80,80 @@ class PostController
     }
 
     $router->render("/posts/create", [
+      "post" => $post,
+      "errors" => $errors
+    ]);
+  }
+
+  public static function update(Router $router)
+  {
+    $id = filter_var($_GET["id"], FILTER_VALIDATE_INT);
+
+    if (!$id) {
+      header("Location: /");
+    };
+
+    /** @var \Model\Post $post **/
+    $post = Post::findPostById($id);
+    $errors = [];
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+      $args = $_POST;
+
+      // we take the new values comming from the $_POST, we need to update the properties in the object
+      $post->sincronize($args);
+
+      $image = $_FILES["feature_image"]["tmp_name"];
+
+      if (!empty($image)) {
+
+        $manager =  new ImageManager(Driver::class);
+
+        $image = $manager->read($_FILES["feature_image"]["tmp_name"]);
+
+        $dirImages = $_SERVER["DOCUMENT_ROOT"] . "/images/";
+
+        if (!is_dir($dirImages)) {
+          mkdir($dirImages);
+        }
+
+        $nameImage = md5(uniqid(rand(), true)) .".jpeg";
+
+        $pathImage = $dirImages . $nameImage;
+
+        $image->save($pathImage);
+
+        $post->feature_image = $nameImage;
+        
+        // if we have a hidden input with a value image, it means the user has subtitued this image with the one above. So we need to remove from the server
+        if ($_POST["feature_image"]) {
+
+          $pathPreviousImage = $dirImages . $_POST["feature_image"];
+
+          file_exists($pathPreviousImage) && unlink($pathPreviousImage);
+        }
+      }
+
+      $errors = $post->getErrors();
+
+      if (empty($errors)) {
+
+        $result = $post->update($id);
+
+        if ($result) {
+
+          header("Location: /posts/admin?message=2");
+
+        } else {
+
+          echo "Something went wrong";
+
+        }
+      }
+    }
+
+    $router->render("/posts/update", [
       "post" => $post,
       "errors" => $errors
     ]);
