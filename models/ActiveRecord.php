@@ -72,7 +72,28 @@ class ActiveRecord
     $values = join("', '", array_values($proprerties));
 
     $query = "INSERT INTO " . static::$table . " (" . $keys . ") VALUES ('" . $values . "');";
- 
+
+    $result = self::$db->query($query);
+
+    return $result;
+  }
+
+  public function update($id)
+  {
+    $keysValues = [];
+    foreach ($this as $key => $value) {
+
+      if ($key === self::modelName(static::class) . "_id" or empty($value) or is_null($value))
+        continue;
+      $keysValues[] = $key . " = " . "'" . $value . "'";
+    }
+
+    $columnsValues = join(", ", $keysValues);
+    
+    $query = "UPDATE " . static::$table . "
+    SET " . $columnsValues . "
+    WHERE " . self::modelName(static::class) . "_id = " . $id . ";";
+
     $result = self::$db->query($query);
 
     return $result;
