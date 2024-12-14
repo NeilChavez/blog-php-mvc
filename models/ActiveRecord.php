@@ -80,16 +80,17 @@ class ActiveRecord
 
   public function update($id)
   {
+    
+    $attributes = $this->getObjectKeysAndValues();
+    
     $keysValues = [];
-    foreach ($this as $key => $value) {
 
-      if ($key === self::modelName(static::class) . "_id" or empty($value) or is_null($value))
-        continue;
-      $keysValues[] = $key . " = " . "'" . $value . "'";
+    foreach($attributes as $key => $value){
+      $keysValues[] = $key . " = " . $value;
     }
 
     $columnsValues = join(", ", $keysValues);
-    
+
     $query = "UPDATE " . static::$table . "
     SET " . $columnsValues . "
     WHERE " . self::modelName(static::class) . "_id = " . $id . ";";
@@ -128,5 +129,15 @@ class ActiveRecord
     $result = "s" === strlen($class) - 1 ? rtrim($class) : $class;
 
     return strtolower($result);
+  }
+  public function sincronize($args = [])
+  {
+
+    foreach ($args as $key => $value) {
+
+      if (property_exists($this, $key) && $value !== null) {
+        $this->$key = $value;
+      }
+    }
   }
 }
