@@ -6,6 +6,7 @@ use mysqli;
 
 class ActiveRecord
 {
+  protected $id;
   protected static $table;
   protected static mysqli $db;
 
@@ -78,7 +79,7 @@ class ActiveRecord
     return $result;
   }
 
-  public function update($id)
+  public function update()
   {
     
     $attributes = $this->getObjectKeysAndValues();
@@ -93,7 +94,7 @@ class ActiveRecord
 
     $query = "UPDATE " . static::$table . "
     SET " . $columnsValues . "
-    WHERE " . self::modelName(static::class) . "_id = " . $id . ";";
+    WHERE " . self::modelName(static::class) . "_id = " . $this->id . ";";
 
     $result = self::$db->query($query);
 
