@@ -25,7 +25,7 @@ class Post extends ActiveRecord
 
     $this->post_id = $parametres["post_id"] ?? null;
     $this->title = $parametres["title"] ?? "";
-    $this->feature_image = $parametres["feature_image"] ?? null;
+    $this->feature_image = $parametres["feature_image"] ?? "";
     $this->content = $parametres["content"] ?? "";
     $this->status = $parametres["status"] ?? null;
     $this->created_at = $parametres["created_at"] ?? date("Y-m-d H:i:s");
@@ -44,7 +44,6 @@ class Post extends ActiveRecord
 
     if (!$this->feature_image) {
       $this->errors["feature_image"] = "Your need to insert an image";
-
     }
 
     return $this->errors;
@@ -53,13 +52,43 @@ class Post extends ActiveRecord
 
   public static function getAll()
   {
-    
+
     return self::select();
   }
 
-  public static function findPostById($id)
+  public static function findPostById($id): Post
   {
-    return self::findById($id);    
+    return self::findById($id);
   }
 
+  public function removePost()
+  {
+    $this->removeImage();
+    return $this->delete();
+  }
+  public function getImage()
+  {
+    return $this->feature_image;
+  }
+
+  public function setImage($image)
+  {
+
+    // remove previous image from the server when there is one
+    $this->removeImage();
+
+    //And set et new image name to the property feature_image
+    $this->feature_image = $image;
+  }
+  public function removeImage()
+  {
+    $pathImages = $_SERVER["DOCUMENT_ROOT"] . "/images/";
+    $previousImage = $this->getImage() ?? "";
+
+    //if this file exists then remove it
+    if (is_file($pathImages . $previousImage)) {
+
+      unlink($pathImages . $previousImage);
+    }
+  }
 }
