@@ -130,7 +130,6 @@ class PostController
         if ($result) {
 
           header("Location: /posts/admin?message=2");
-
         } else {
 
           echo "Something went wrong";
@@ -144,4 +143,21 @@ class PostController
     ]);
   }
 
+  public static function delete($id)
+  {
+
+    $id = filter_var($_POST["id"], FILTER_VALIDATE_INT);
+
+    if (!$id) {
+
+      header("Location: /posts/admin");
+    }
+    /** @var \Model\Post $post **/
+    $post = Post::findById($id);
+    $result = $post->removePost();
+
+    if ($result) {
+      header("Location: /posts/admin?message=3");
+    }
+  }
 }
