@@ -6,7 +6,6 @@ use mysqli;
 
 class ActiveRecord
 {
-  protected $id;
   protected static $table;
   protected static mysqli $db;
 
@@ -81,24 +80,44 @@ class ActiveRecord
 
   public function update()
   {
-    
+
     $attributes = $this->getObjectKeysAndValues();
-    
+
     $keysValues = [];
 
-    foreach($attributes as $key => $value){
-      $keysValues[] = $key . " = " . $value;
+    foreach ($attributes as $key => $value) {
+      $keysValues[] = $key . " = " . "'" . $value . "'";
     }
 
     $columnsValues = join(", ", $keysValues);
 
+    $id = $this->getId();
+
     $query = "UPDATE " . static::$table . "
     SET " . $columnsValues . "
-    WHERE " . self::modelName(static::class) . "_id = " . $this->id . ";";
+    WHERE " . self::modelName(static::class) . "_id = " . $this->$id . ";";
 
     $result = self::$db->query($query);
 
     return $result;
+  }
+
+  public function delete()
+  {
+
+    $id = $this->getId();
+
+    $query = "DELETE FROM " . static::$table . " WHERE " . self::modelName(static::class) . "_id = " . $this->$id . ";";
+
+    $result = self::$db->query($query);
+
+    return $result;
+  }
+  public function getId()
+  {
+    $name_id = $this->modelName($this::class) . "_id";
+
+    return $name_id;
   }
   public function getObjectKeysAndValues()
   {
@@ -107,11 +126,16 @@ class ActiveRecord
     foreach ($this as $key => $value) {
       if ($key === self::modelName(static::class) . "_id" or empty($value) or is_null($value)) continue;
 
-      $keysAndValues[$key] = $value;
+      $keysAndValues[$key] = self::sanitizeValue($value);
     }
     return $keysAndValues;
   }
 
+  static public function sanitizeValue($value)
+  {
+    return self::$db->real_escape_string($value);
+  }
+  
   public static function escapeHtml($input)
   {
     return htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
