@@ -23,7 +23,10 @@ class AuthController
         new \ErrorException("Not Valid email format");
       }
 
-      $args = ["email" => $email, "password" => $password];
+      $args = [
+        "email" => $email,
+        "password" => $password
+      ];
 
       $user = new User($args);
 
@@ -36,18 +39,18 @@ class AuthController
         $errors["email"] = "User already exists";
       }
 
-      if(empty($errors)){
+      if (empty($errors)) {
 
-        // Hash a new password for storing in the database.
+        // Hash a new password for storing in the database
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        
+
         // generate token one use
         $token = bin2hex(random_bytes(50));
-        
+
         //create user
         $user->setPassword($hashedPassword)
-        ->setToken($token)
-        ->create();
+             ->setToken($token)
+             ->create();
       }
     }
 
