@@ -10,6 +10,7 @@ class AuthController
   static public function signUp(Router $router)
   {
     $errors = [];
+    $user = new User();
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       // sanitize the data
@@ -49,13 +50,14 @@ class AuthController
 
         //create user
         $user->setPassword($hashedPassword)
-             ->setToken($token)
-             ->create();
+          ->setToken($token)
+          ->create();
       }
     }
 
     $router->render("/sign-up", [
-      "errors" => $errors
+      "errors" => $errors,
+      "user" => $user
     ]);
   }
 }
