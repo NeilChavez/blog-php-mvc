@@ -2,8 +2,11 @@
 
 namespace Controller;
 
+use Exception;
 use Model\User;
 use MVC\Router;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\PHPMailer;
 
 class AuthController
 {
@@ -49,9 +52,18 @@ class AuthController
         $token = bin2hex(random_bytes(50));
 
         //create user
-        $user->setPassword($hashedPassword)
+        $result = $user
+          ->setPassword($hashedPassword)
           ->setToken($token)
           ->create();
+        if ($result) {
+
+          self::sendVerificationEmail($email, $token);
+          header("Location: /user-profile");
+        } else {
+
+          new \ErrorException("Something went wrong with the creation of the user");
+        }
       }
     }
 
@@ -59,5 +71,49 @@ class AuthController
       "errors" => $errors,
       "user" => $user
     ]);
+  }
+
+  static public
+  function sendVerificationEmail($email, $verificationCode)
+  {
+    $mail = new PHPMailer(true);
+
+    try {
+
+      // Server settings
+      $mail->SMTPDebug = SMTP::DEBUG_OFF; // Set to DEBUG_SERVER for debugging
+      $mail->isSMTP();
+
+      $mail->Host = 'sandbox.smtp.mailtrap.io'; // Mailtrap SMTP server host 
+      $mail->SMTPAuth = true;
+      $mail->Username = $_ENV['MAILTRAP_USER']; // Your Mailtrap SMTP username
+      $mail->Password = $_ENV['MAILTRAP_PASS']; // Your Mailtrap SMTP password
+      $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Enable TLS encryption
+      $mail->Port = 2525; // TCP port to connect to
+
+      //Recipients
+      $mail->setFrom('neil-blog@myblog.com', "Neil"); //Sender's email and name
+      $mail->addAddress($email); // Recipient's email
+
+      //Content
+      $mail->isHTML(false); //Set to true if sending HTML email
+      $mail->CharSet = 'UTF-8';
+      $mail->Subject = 'Email Verification';
+
+      //content
+      $html = "<html>";
+      $html .= "Your verification code is: " . $verificationCode;
+      $html .= "<a href= " .$_ENV["DOMAIN_APP"]. "/email-verification?token=" . $verificationCode . ">Clik here to verify your account</a>";
+      $html .= "";
+      "</html>";
+      $mail->Body = $html;
+      $mail->AltBody = "contenido sin HTML";
+
+      $mail->send();
+      return true;
+    } catch (Exception $e) {
+
+      return false;
+    }
   }
 }
