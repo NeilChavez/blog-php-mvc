@@ -30,4 +30,9 @@ class PageController
     ]);
 
   }
+
+  public static function signUp(Router $router)
+  {
+    $router->render("/sign-up");
+  }
 }
