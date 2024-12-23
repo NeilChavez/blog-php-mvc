@@ -116,20 +116,35 @@ class AuthController
 
     $user = User::findUserBy("token", $token);
 
-    if ($user) {
-
-      /** @var \Model\User $user **/
-      $user
-        ->setToken(null)
-        ->update();
-
-      session_start();
-      $_SESSION["user"] = $user;
-
-      header("Location: /user-profile");
-    } else {
+    if (!$user) {
 
       header("Location: /");
     }
+
+    
+    /** @var \Model\User $user **/
+    $result = $user
+      ->setToken("actived")
+      ->update();
+
+    if (!$result) {
+
+      throw new \ErrorException("Something went grown with the valudation of token");
+    }
+
+    session_start();
+    $_SESSION["user"] = $user;
+
+    header("Location: /user-profile");
+  }
+
+  public static function logout()
+  {
+    if (!isset($_SESSION)) {
+      session_start();
+    }
+    unset($_SESSION["user"]);
+
+    header("Location: /");
   }
 }
