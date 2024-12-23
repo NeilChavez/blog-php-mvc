@@ -19,6 +19,7 @@ class AuthController
       // sanitize the data
       $password = $_POST["password"];
       $email = $_POST["email"];
+      $username = $_POST["username"];
 
       $emailSanitized = filter_var($email, FILTER_SANITIZE_EMAIL);
       $isTrustedEmail = filter_var($email, FILTER_VALIDATE_EMAIL);
@@ -29,19 +30,13 @@ class AuthController
 
       $args = [
         "email" => $email,
-        "password" => $password
+        "password" => $password,
+        "username" => $username
       ];
 
       $user = new User($args);
 
       $errors = $user->validate();
-
-      //check if the user already exists
-      $userAlreadyExists = User::findUserByMail($email);
-
-      if ($userAlreadyExists) {
-        $errors["email"] = "User already exists";
-      }
 
       if (empty($errors)) {
 
@@ -103,7 +98,7 @@ class AuthController
       //content
       $html = "<html>";
       $html .= "Your verification code is: " . $verificationCode;
-      $html .= "<a href= " .$_ENV["DOMAIN_APP"]. "/email-verification?token=" . $verificationCode . ">Clik here to verify your account</a>";
+      $html .= "<a href= " . $_ENV["DOMAIN_APP"] . "/email-verification?token=" . $verificationCode . ">Clik here to verify your account</a>";
       $html .= "";
       "</html>";
       $mail->Body = $html;
