@@ -54,7 +54,7 @@ class AuthController
         if ($result) {
 
           self::sendVerificationEmail($email, $token);
-          header("Location: /user-profile");
+          header("Location: /welcome?username=" . $username);
         } else {
 
           new \ErrorException("Something went wrong with the creation of the user");
@@ -68,8 +68,7 @@ class AuthController
     ]);
   }
 
-  static public
-  function sendVerificationEmail($email, $verificationCode)
+  static public function sendVerificationEmail($email, $verificationCode)
   {
     $mail = new PHPMailer(true);
 
@@ -109,6 +108,28 @@ class AuthController
     } catch (Exception $e) {
 
       return false;
+    }
+  }
+  static public function emailVerification(Router $router)
+  {
+    $token = htmlspecialchars($_GET["token"]);
+
+    $user = User::findUserBy("token", $token);
+
+    if ($user) {
+
+      /** @var \Model\User $user **/
+      $user
+        ->setToken(null)
+        ->update();
+
+      session_start();
+      $_SESSION["user"] = $user;
+
+      header("Location: /user-profile");
+    } else {
+
+      header("Location: /");
     }
   }
 }
