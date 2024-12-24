@@ -36,7 +36,7 @@ class AuthController
 
       $user = new User($args);
 
-      $errors = $user->validate();
+      $errors = $user->validateRegistrationFields();
 
       if (empty($errors)) {
 
@@ -101,7 +101,7 @@ class AuthController
       $html .= "";
       "</html>";
       $mail->Body = $html;
-      $mail->AltBody = "contenido sin HTML";
+      $mail->AltBody = "Content without HTML";
 
       $mail->send();
       return true;
@@ -121,7 +121,7 @@ class AuthController
       header("Location: /");
     }
 
-    
+
     /** @var \Model\User $user **/
     $result = $user
       ->setToken("actived")
@@ -146,5 +146,51 @@ class AuthController
     unset($_SESSION["user"]);
 
     header("Location: /");
+  }
+
+  public static function login(Router $router)
+  {
+
+    $user = new User();
+    $errors = [];
+    if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+      $email = filter_var($_POST["email"], FILTER_SANITIZE_EMAIL);
+      $password = $_POST["password"];
+      $args = [
+        "email" => $email,
+        "password" => $password
+      ];
+
+      $user = new User($args);
+      $errors = $user->validationLogin();
+
+      $userExists =  $user->findUserBy("email", $email);
+
+       if (!$userExists) {
+         $errors["email"] = "User doesn't exists";
+       }
+
+      $isLoggedIn = $user->checkPassword();
+      
+      if (!$isLoggedIn) {
+        $errors["password"] = "Email or Password is not correct";
+      }
+      if (empty($errors)) {
+
+        if (!isset($_SESSION)) {
+          session_start();
+        }
+
+        $_SESSION["user"] = $user;
+
+        header("Location: /user-profile");
+      }
+    }
+
+    $router->render("/login", [
+      "user" => $user,
+      "errors" => $errors
+    ]);
   }
 }
