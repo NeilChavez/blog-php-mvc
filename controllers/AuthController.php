@@ -165,14 +165,14 @@ class AuthController
       $user = new User($args);
       $errors = $user->validationLogin();
 
-      $userExists =  $user->findUserBy("email", $email);
+      $user =  $user->findUserBy("email", $email);
 
-       if (!$userExists) {
-         $errors["email"] = "User doesn't exists";
-       }
+      if (!$user) {
+        $errors["email"] = "User doesn't exists";
+      }
+      /** @var \Model\User $user **/
+      $isLoggedIn = $user->checkPassword($password);
 
-      $isLoggedIn = $user->checkPassword();
-      
       if (!$isLoggedIn) {
         $errors["password"] = "Email or Password is not correct";
       }
