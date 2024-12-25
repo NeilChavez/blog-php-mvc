@@ -6,10 +6,15 @@ class User extends ActiveRecord
 {
   static public $table = "users";
   static public $columns = ["user_id", "username", "avatar", "email", "password", "role", "token", "created_at", "updated_at"];
+  public $user_id;
   public $username;
+  public $avatar;
   public $email;
   public $password;
+  public $role;
   public $token;
+  public $created_at;
+  public $updated_at;
   public $errors = [];
 
   public function __construct($args = [])
@@ -19,7 +24,7 @@ class User extends ActiveRecord
     $this->username = $args["username"] ?? "";
   }
 
-  public function validate()
+  public function validateRegistrationFields()
   {
 
     if (!$this->username) {
@@ -43,7 +48,10 @@ class User extends ActiveRecord
 
       return $this->errors;
     }
+  }
 
+  public function validationLogin()
+  {
 
     //Minimum eight characters, at least one letter and one number:
     $regexPassword = "/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/";
@@ -85,8 +93,24 @@ class User extends ActiveRecord
 
   static public function findUserBy($column, $value)
   {
-    $query = "SELECT email FROM " . self::$table . " WHERE " . $column . " = '$value'";
+    $query = "SELECT user_id, username, avatar, email, role, token FROM " . self::$table . " WHERE " . $column . " = '$value';";
 
-    return self::$db->query($query)->num_rows;
+    $result = static::querySQL($query);
+
+    return array_shift($result);
+  }
+
+  public function checkPassword($password)
+  {
+
+    $query = "SELECT password FROM " . static::$table . " WHERE email = '" . $this->email . "';";
+
+    $result = self::$db->query($query);
+
+    $result = $result->fetch_assoc();
+
+    $hashedPassword = $result["password"];
+
+    return password_verify($password, $hashedPassword);
   }
 }
