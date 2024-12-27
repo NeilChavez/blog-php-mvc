@@ -55,6 +55,7 @@ class AuthController
 
           self::sendVerificationEmail($email, $token);
           header("Location: /welcome?username=" . $username);
+          exit;
         } else {
 
           new \ErrorException("Something went wrong with the creation of the user");
@@ -119,6 +120,7 @@ class AuthController
     if (!$user) {
 
       header("Location: /");
+      exit;
     }
 
 
@@ -136,6 +138,7 @@ class AuthController
     $_SESSION["user"] = $user;
 
     header("Location: /user-profile");
+    exit;
   }
 
   public static function logout()
@@ -146,6 +149,7 @@ class AuthController
     unset($_SESSION["user"]);
 
     header("Location: /");
+    exit;
   }
 
   public static function login(Router $router)
@@ -185,6 +189,7 @@ class AuthController
         $_SESSION["user"] = $user;
 
         header("Location: /user-profile");
+        exit;
       }
     }
 
