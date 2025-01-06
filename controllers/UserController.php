@@ -10,14 +10,26 @@ class UserController
   public static function readUser(Router $router)
   {
 
-    session_start();
+    $id = filter_var($_GET["id"], FILTER_VALIDATE_INT);
 
-    $emailUser = $_SESSION["email"];
+    if (!$id) {
+      header("Location: /home");
+      exit;
+    }
 
-    $user = User::findUserBy("email", $emailUser);
+    $user = User::findUserBy("user_id", $id);
 
     $router->render("/user-profile", [
       "user" => $user
+    ]);
+  }
+
+  public static function allUsers(Router $router)
+  {
+    $users = User::select();
+
+    $router->render("/users/all-users", [
+      "users" => $users
     ]);
   }
   public static function update()
