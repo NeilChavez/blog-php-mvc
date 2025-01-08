@@ -216,4 +216,28 @@ class UserController
     header("Location: /user-profile");
     exit;
   }
+
+  static public function delete()
+  {
+    $id = filter_var($_POST["user_id"], FILTER_VALIDATE_INT);
+
+    if (!$id) {
+      header("Location: /");
+      exit;
+    }
+
+    if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+      $user = User::findById($id);
+
+      if ($user) {
+
+        $result = $user->delete();
+     
+        if ($result) {
+          header("Location: /users/all-users");
+        }
+      }
+    }
+  }
 }
