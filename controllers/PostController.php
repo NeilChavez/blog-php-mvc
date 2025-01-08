@@ -154,7 +154,11 @@ class PostController
     }
     /** @var \Model\Post $post **/
     $post = Post::findById($id);
-    $result = $post->removePost();
+
+    if ($post) {
+
+      $result = $post->removePost();
+    }
 
     if ($result) {
       header("Location: /posts/admin?message=3");
